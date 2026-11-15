@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escrits amb capçalera · CGT Castelló</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<script src="vendor/jspdf.umd.min.js"></script>
+<script src="models.js"></script>
+<style>
+:root{--roig:#E42127;--negre:#111111;--groc:#E9E84C;--blanc:#fff;--paper:#EDEBE7;--gris:#5F5E59;--linia:#E4E2DD}
+*{box-sizing:border-box;border-radius:0}
+html,body{margin:0;background:var(--paper);color:var(--negre);font-family:'Open Sans',system-ui,sans-serif;font-size:16px;-webkit-text-size-adjust:100%}
+header.top{background:var(--negre);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:14px}
+header.top .t{font-family:Anton,sans-serif;text-transform:uppercase;font-size:24px;line-height:1;letter-spacing:.01em}
+header.top .k{font-weight:800;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#BDBDBD;margin-top:4px}
+.wrap{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:24px;padding:20px;max-width:1280px;margin:0 auto;align-items:start}
+@media (max-width:860px){.wrap{grid-template-columns:1fr;padding:12px 12px 110px;gap:16px}}
+form{display:flex;flex-direction:column;gap:14px}
+fieldset{border:0;margin:0;padding:16px;background:#fff;display:flex;flex-direction:column;gap:12px}
+legend{float:left;width:100%;padding:0;margin:0 0 2px;font-family:Anton,sans-serif;text-transform:uppercase;font-size:20px;line-height:1}
+label{display:flex;flex-direction:column;gap:5px;font-weight:700;font-size:13px}
+label .h{font-weight:400;color:var(--gris);font-size:12px}
+input[type=text],input[type=date],select,textarea{font:inherit;font-size:16px;font-weight:400;border:2px solid var(--negre);background:#fff;padding:10px 11px;width:100%;color:var(--negre);-webkit-appearance:none;appearance:none}
+select{background-image:linear-gradient(45deg,transparent 50%,#111 50%),linear-gradient(135deg,#111 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 12px) 50%;background-size:6px 6px;background-repeat:no-repeat;padding-right:34px}
+textarea{resize:vertical;line-height:1.5}
+#cos{min-height:340px}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid var(--groc);outline-offset:1px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:flex;border:2px solid var(--negre)}
+.seg button{flex:1;border:0;background:#fff;font:inherit;font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase;padding:11px 6px;min-height:44px;cursor:pointer;color:var(--negre)}
+.seg button[aria-pressed=true]{background:var(--negre);color:#fff}
+.chk{flex-direction:row;align-items:flex-start;gap:10px;font-weight:700;min-height:44px;cursor:pointer}
+.chk input{width:22px;height:22px;margin:1px 0 0;accent-color:var(--negre);flex:none}
+.chk span{display:flex;flex-direction:column;gap:2px}
+.btn{font-family:Anton,sans-serif;text-transform:uppercase;font-size:19px;letter-spacing:.02em;line-height:1;border:2px solid var(--negre);background:#fff;color:var(--negre);padding:12px 16px;min-height:48px;cursor:pointer}
+.btn.main{background:var(--roig);border-color:var(--roig);color:#fff}
+.btn.dark{background:var(--negre);color:#fff}
+.btn.small{font-size:15px;min-height:44px;padding:9px 12px}
+.btn:disabled{opacity:.5;cursor:wait}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.sig{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sig img{height:56px;max-width:180px;border:2px dashed #BDBDBD;padding:4px;background:#fff}
+.banner{background:var(--groc);padding:12px 14px;font-size:14px;font-weight:700;display:flex;flex-direction:column;gap:10px}
+.banner[hidden]{display:none}
+.warn{background:#fff;border-left:0;border-top:4px solid var(--roig);padding:12px 14px;font-size:13px;line-height:1.45}
+.warn[hidden]{display:none}
+.warn b{font-weight:800}
+.prev{position:sticky;top:12px;display:flex;flex-direction:column;gap:12px}
+@media (max-width:860px){.prev{position:static}}
+.prev .lab{font-weight:800;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gris)}
+.pages{display:flex;flex-direction:column;gap:14px}
+.pages canvas{width:100%;height:auto;display:block;background:#fff;box-shadow:0 0 0 1px #d8d5cf}
+.status{font-size:13px;min-height:18px;font-weight:700}
+.bar{display:flex;gap:8px;flex-wrap:wrap}
+@media (max-width:860px){
+  .bar{position:fixed;left:0;right:0;bottom:0;z-index:5;background:#fff;border-top:4px solid var(--negre);padding:10px 12px calc(10px + env(safe-area-inset-bottom));}
+  .bar .btn{flex:1}
+}
+.modal{position:fixed;inset:0;background:rgba(17,17,17,.7);z-index:20;display:flex;align-items:center;justify-content:center;padding:12px}
+.modal[hidden]{display:none}
+.modal .box{background:#fff;width:100%;max-width:640px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.modal .box .t{font-family:Anton,sans-serif;text-transform:uppercase;font-size:22px;line-height:1}
+#pad{width:100%;height:240px;border:2px solid var(--negre);touch-action:none;background:#fff;display:block;background-image:linear-gradient(transparent calc(100% - 60px),#BDBDBD calc(100% - 60px),#BDBDBD calc(100% - 58px),transparent calc(100% - 58px))}
+.foot{max-width:1280px;margin:0 auto;padding:0 20px 30px;font-size:12px;color:var(--gris);line-height:1.5}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <div class="t">Escrits amb capçalera</div>
+    <div class="k">CGT Castelló · per a enviar a les empreses</div>
+  </div>
+</header>
+
+<div class="wrap">
+<form id="f" autocomplete="off">
+  <fieldset>
+    <legend>Escrit</legend>
+    <label>Idioma de l'escrit
+      <div class="seg" role="group" aria-label="Idioma de l'escrit">
+        <button type="button" data-lang="es" aria-pressed="true">Castellano</button>
+        <button type="button" data-lang="va" aria-pressed="false">Valencià</button>
+      </div>
+    </label>
+    <label for="model">Model
+      <select id="model">
+        <option value="blanc">En blanc</option>
+      </select>
+      <span class="h" id="modelHint"></span>
+    </label>
+    <div class="banner" id="replaceBanner" hidden>
+      <div>Ja has escrit text. Vols substituir-lo pel model?</div>
+      <div class="btns"><button type="button" class="btn small dark" id="repYes">Sí, substitueix</button><button type="button" class="btn small" id="repNo">No, deixa'l</button></div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Destinatària</legend>
+    <label>A l'atenció de <span class="h">Persona o departament (opcional)</span><input type="text" id="aten" placeholder="Dept. de Recursos Humans"></label>
+    <label>Empresa<input type="text" id="empresa" placeholder="Nom de l'empresa"></label>
+    <label>Adreça <span class="h">Opcional</span><textarea id="adreca" rows="2" placeholder="Carrer, número&#10;CP i població"></textarea></label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Contingut</legend>
+    <div class="row">
+      <label>Lloc<input type="text" id="lloc" value="Castelló de la Plana"></label>
+      <label>Data<input type="date" id="data"></label>
+    </div>
+    <label>Assumpte<input type="text" id="assumpte"></label>
+    <label>Text <span class="h">Deixa una línia en blanc entre paràgrafs. El que va entre [claudàtors] cal omplir-ho.</span><textarea id="cos"></textarea></label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Signa</legend>
+    <label>Nom i cognoms<input type="text" id="nom"></label>
+    <label>Càrrec <span class="h">Opcional. P. ex. «Representant de la Secció Sindical de CGT»</span><input type="text" id="carrec"></label>
+    <div class="sig">
+      <img id="sigImg" alt="Signatura" hidden>
+      <div class="btns">
+        <button type="button" class="btn small" id="sigDraw">Signa amb el dit</button>
+        <label class="btn small" style="flex-direction:row;font-weight:400">Puja una imatge<input type="file" id="sigFile" accept="image/*" class="sr"></label>
+        <button type="button" class="btn small" id="sigDel" hidden>Lleva la signatura</button>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Opcions</legend>
+    <label class="chk"><input type="checkbox" id="rebut" checked><span>Requadre de «Rebut» <span class="h">Perquè l'empresa signe o segelle la vostra còpia en mà</span></span></label>
+    <label class="chk"><input type="checkbox" id="copies"><span>Dues còpies <span class="h">«Exemplar per a l'empresa» i «Exemplar per a CGT» en el mateix PDF</span></span></label>
+    <label class="chk"><input type="checkbox" id="bn"><span>Blanc i negre <span class="h">Per a imprimir o fotocopiar sense color</span></span></label>
+    <div class="btns">
+      <button type="button" class="btn small" id="copyTxt">Copia el text</button>
+      <button type="button" class="btn small" id="clearAll">Buida-ho tot</button>
+    </div>
+    <div class="banner" id="clearBanner" hidden>
+      <div>S'esborraran tots els camps i la signatura.</div>
+      <div class="btns"><button type="button" class="btn small dark" id="clrYes">Esborra</button><button type="button" class="btn small" id="clrNo">Cancel·la</button></div>
+    </div>
+  </fieldset>
+</form>
+
+<section class="prev" aria-label="Previsualització">
+  <div class="bar">
+    <button type="button" class="btn main" id="pdfBtn">Baixa el PDF</button>
+    <button type="button" class="btn dark" id="shareBtn" hidden>Comparteix</button>
+  </div>
+  <div class="status" id="status" role="status" aria-live="polite"></div>
+  <div class="warn" id="warn" hidden></div>
+  <div class="lab">Previsualització</div>
+  <div class="pages" id="pages"></div>
+</section>
+</div>
+<div class="foot">Tot es fa al teu dispositiu: el text i la signatura no s'envien a cap servidor. L'esborrany es guarda només en aquest navegador. Els models són els de CGT Castelló (cgtcastello.org/delegades) i els de permisos familiars de la CIG (maig de 2026), traduïts del gallec. Revisa'ls i adapta'ls al teu cas i al teu conveni abans d'enviar-los.</div>
+
+<div class="modal" id="padModal" hidden role="dialog" aria-modal="true" aria-labelledby="padT">
+  <div class="box">
+    <div class="t" id="padT">Signa ací</div>
+    <canvas id="pad" aria-label="Espai per a signar"></canvas>
+    <div class="btns">
+      <button type="button" class="btn small main" id="padOk">Fet</button>
+      <button type="button" class="btn small" id="padClear">Torna a començar</button>
+      <button type="button" class="btn small" id="padCancel">Cancel·la</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+const LOGO={color:"<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"258.59pt\" height=\"152.94pt\" viewBox=\"34.23 27.46 258.59 152.94\">\n<path fill=\"#E42127\" d=\"M 37.121094 138.109375 L 37.121094 30.601562 L 286.996094 30.601562 Z\"/>\n<path fill-rule=\"nonzero\" fill=\"#111111\" fill-opacity=\"1\" d=\"M 77.675781 174.5 C 72.9375 174.5 69.664062 170.550781 69.664062 165.816406 L 69.664062 165.734375 C 69.664062 161 73.019531 157.128906 77.675781 157.128906 C 80.4375 157.128906 82.609375 158.316406 84.742188 160.25 L 88.609375 155.789062 C 86.042969 153.261719 82.925781 151.523438 77.714844 151.523438 C 69.226562 151.523438 63.308594 157.957031 63.308594 165.816406 L 63.308594 165.894531 C 63.308594 173.828125 69.347656 180.105469 77.476562 180.105469 C 82.808594 180.105469 85.964844 178.207031 88.808594 175.167969 L 84.941406 171.261719 C 82.769531 173.234375 80.832031 174.5 77.675781 174.5 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#111111\" fill-opacity=\"1\" d=\"M 100.21875 168.0625 L 103.890625 159.105469 L 107.5625 168.0625 Z M 101.167969 151.800781 L 89.324219 179.628906 L 95.523438 179.628906 L 98.046875 173.433594 L 109.734375 173.433594 L 112.257812 179.628906 L 118.613281 179.628906 L 106.769531 151.800781 Z M 101.167969 151.800781 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#111111\" fill-opacity=\"1\" d=\"M 131.722656 163.089844 C 126.949219 161.867188 125.761719 161.273438 125.761719 159.460938 L 125.761719 159.378906 C 125.761719 158.039062 126.984375 156.972656 129.316406 156.972656 C 131.644531 156.972656 134.050781 158 136.5 159.695312 L 139.65625 155.117188 C 136.855469 152.867188 133.421875 151.605469 129.394531 151.605469 C 123.75 151.605469 119.722656 154.921875 119.722656 159.933594 L 119.722656 160.011719 C 119.722656 165.5 123.316406 167.039062 128.882812 168.460938 C 133.5 169.644531 134.445312 170.433594 134.445312 171.972656 L 134.445312 172.050781 C 134.445312 173.671875 132.949219 174.65625 130.460938 174.65625 C 127.304688 174.65625 124.699219 173.355469 122.210938 171.300781 L 118.617188 175.605469 C 121.933594 178.566406 126.160156 180.027344 130.34375 180.027344 C 136.300781 180.027344 140.488281 176.945312 140.488281 171.457031 L 140.488281 171.378906 C 140.488281 166.566406 137.328125 164.550781 131.722656 163.089844 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#111111\" fill-opacity=\"1\" d=\"M 141.238281 157.605469 L 149.648438 157.605469 L 149.648438 179.628906 L 155.726562 179.628906 L 155.726562 157.605469 L 164.132812 157.605469 L 164.132812 152 L 141.238281 152 Z M 141.238281 157.605469 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#111111\" fill-opacity=\"1\" d=\"M 172.859375 168.421875 L 185.886719 168.421875 L 185.886719 163.011719 L 172.859375 163.011719 L 172.859375 157.40625 L 187.664062 157.40625 L 187.664062 152 L 166.824219 152 L 166.824219 179.628906 L 187.859375 179.628906 L 187.859375 174.222656 L 172.859375 174.222656 Z M 172.859375 168.421875 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#111111\" fill-opacity=\"1\" d=\"M 197.378906 152 L 191.296875 152 L 191.296875 179.628906 L 211.152344 179.628906 L 211.152344 174.105469 L 197.378906 174.105469 Z M 197.378906 152 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#111111\" fill-opacity=\"1\" d=\"M 219.839844 152 L 213.761719 152 L 213.761719 179.628906 L 233.617188 179.628906 L 233.617188 174.105469 L 219.839844 174.105469 Z M 219.839844 152 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#111111\" fill-opacity=\"1\" d=\"M 255.605469 145.484375 L 248.769531 145.394531 L 245.660156 149.433594 L 250.238281 149.433594 Z M 255.605469 145.484375 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#111111\" fill-opacity=\"1\" d=\"M 256.4375 165.894531 C 256.4375 170.628906 253.042969 174.5 248.148438 174.5 C 243.253906 174.5 239.777344 170.550781 239.777344 165.816406 L 239.777344 165.734375 C 239.777344 161 243.175781 157.128906 248.066406 157.128906 C 252.960938 157.128906 256.4375 161.078125 256.4375 165.816406 Z M 248.148438 151.523438 C 239.621094 151.523438 233.421875 157.960938 233.421875 165.816406 L 233.421875 165.894531 C 233.421875 173.75 239.542969 180.105469 248.066406 180.105469 C 256.59375 180.105469 262.792969 173.667969 262.792969 165.816406 L 262.792969 165.734375 C 262.792969 157.882812 256.675781 151.523438 248.148438 151.523438 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#111111\" fill-opacity=\"1\" d=\"M 37.121094 138.109375 L 37.121094 30.601562 L 286.996094 30.601562 Z M 34.132812 141.101562 L 291.96875 141.101562 L 291.96875 27.613281 L 34.132812 27.613281 Z M 34.132812 141.101562 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#ffffff\" fill-opacity=\"1\" d=\"M 63.824219 89 L 63.824219 88.804688 C 63.824219 69.015625 79.054688 53.492188 99.621094 53.492188 C 113.496094 53.492188 122.421875 59.3125 128.4375 67.65625 L 114.273438 78.621094 C 110.390625 73.769531 105.929688 70.664062 99.429688 70.664062 C 89.921875 70.664062 83.226562 78.714844 83.226562 88.613281 L 83.226562 88.804688 C 83.226562 98.992188 89.921875 106.949219 99.429688 106.949219 C 106.511719 106.949219 110.683594 103.648438 114.757812 98.703125 L 128.921875 108.792969 C 122.519531 117.621094 113.882812 124.121094 98.847656 124.121094 C 79.441406 124.121094 63.824219 109.277344 63.824219 89 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#ffffff\" fill-opacity=\"1\" d=\"M 132.707031 89 L 132.707031 88.804688 C 132.707031 69.015625 148.230469 53.492188 169.28125 53.492188 C 181.214844 53.492188 189.65625 57.179688 196.835938 63.386719 L 185.773438 76.679688 C 180.921875 72.605469 176.074219 70.277344 169.378906 70.277344 C 159.578125 70.277344 152.011719 78.523438 152.011719 88.902344 L 152.011719 89.097656 C 152.011719 100.058594 159.675781 107.917969 170.445312 107.917969 C 175.003906 107.917969 178.496094 106.949219 181.3125 105.105469 L 181.3125 96.859375 L 167.921875 96.859375 L 167.921875 83.082031 L 199.164062 83.082031 L 199.164062 113.640625 C 191.984375 119.558594 181.992188 124.121094 169.667969 124.121094 C 148.519531 124.121094 132.707031 109.566406 132.707031 89 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#ffffff\" fill-opacity=\"1\" d=\"M 225.261719 71.34375 L 204.886719 71.34375 L 204.886719 54.851562 L 264.457031 54.851562 L 264.457031 71.34375 L 244.082031 71.34375 L 244.082031 122.761719 L 225.261719 122.761719 Z M 225.261719 71.34375 \"></path>\n</svg>",trama:"<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"258.59pt\" height=\"152.94pt\" viewBox=\"34.23 27.46 258.59 152.94\">\n<defs><pattern id=\"tr\" width=\"3.6\" height=\"3.6\" patternUnits=\"userSpaceOnUse\" patternTransform=\"rotate(45)\"><rect width=\"3.6\" height=\"3.6\" fill=\"#fff\"/><circle cx=\"1.8\" cy=\"1.8\" r=\"1.0\" fill=\"#111\"/></pattern></defs><path fill=\"url(#tr)\" d=\"M 37.121094 138.109375 L 37.121094 30.601562 L 286.996094 30.601562 Z\"/>\n<path fill-rule=\"nonzero\" fill=\"#111111\" fill-opacity=\"1\" d=\"M 77.675781 174.5 C 72.9375 174.5 69.664062 170.550781 69.664062 165.816406 L 69.664062 165.734375 C 69.664062 161 73.019531 157.128906 77.675781 157.128906 C 80.4375 157.128906 82.609375 158.316406 84.742188 160.25 L 88.609375 155.789062 C 86.042969 153.261719 82.925781 151.523438 77.714844 151.523438 C 69.226562 151.523438 63.308594 157.957031 63.308594 165.816406 L 63.308594 165.894531 C 63.308594 173.828125 69.347656 180.105469 77.476562 180.105469 C 82.808594 180.105469 85.964844 178.207031 88.808594 175.167969 L 84.941406 171.261719 C 82.769531 173.234375 80.832031 174.5 77.675781 174.5 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#111111\" fill-opacity=\"1\" d=\"M 100.21875 168.0625 L 103.890625 159.105469 L 107.5625 168.0625 Z M 101.167969 151.800781 L 89.324219 179.628906 L 95.523438 179.628906 L 98.046875 173.433594 L 109.734375 173.433594 L 112.257812 179.628906 L 118.613281 179.628906 L 106.769531 151.800781 Z M 101.167969 151.800781 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#111111\" fill-opacity=\"1\" d=\"M 131.722656 163.089844 C 126.949219 161.867188 125.761719 161.273438 125.761719 159.460938 L 125.761719 159.378906 C 125.761719 158.039062 126.984375 156.972656 129.316406 156.972656 C 131.644531 156.972656 134.050781 158 136.5 159.695312 L 139.65625 155.117188 C 136.855469 152.867188 133.421875 151.605469 129.394531 151.605469 C 123.75 151.605469 119.722656 154.921875 119.722656 159.933594 L 119.722656 160.011719 C 119.722656 165.5 123.316406 167.039062 128.882812 168.460938 C 133.5 169.644531 134.445312 170.433594 134.445312 171.972656 L 134.445312 172.050781 C 134.445312 173.671875 132.949219 174.65625 130.460938 174.65625 C 127.304688 174.65625 124.699219 173.355469 122.210938 171.300781 L 118.617188 175.605469 C 121.933594 178.566406 126.160156 180.027344 130.34375 180.027344 C 136.300781 180.027344 140.488281 176.945312 140.488281 171.457031 L 140.488281 171.378906 C 140.488281 166.566406 137.328125 164.550781 131.722656 163.089844 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#111111\" fill-opacity=\"1\" d=\"M 141.238281 157.605469 L 149.648438 157.605469 L 149.648438 179.628906 L 155.726562 179.628906 L 155.726562 157.605469 L 164.132812 157.605469 L 164.132812 152 L 141.238281 152 Z M 141.238281 157.605469 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#111111\" fill-opacity=\"1\" d=\"M 172.859375 168.421875 L 185.886719 168.421875 L 185.886719 163.011719 L 172.859375 163.011719 L 172.859375 157.40625 L 187.664062 157.40625 L 187.664062 152 L 166.824219 152 L 166.824219 179.628906 L 187.859375 179.628906 L 187.859375 174.222656 L 172.859375 174.222656 Z M 172.859375 168.421875 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#111111\" fill-opacity=\"1\" d=\"M 197.378906 152 L 191.296875 152 L 191.296875 179.628906 L 211.152344 179.628906 L 211.152344 174.105469 L 197.378906 174.105469 Z M 197.378906 152 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#111111\" fill-opacity=\"1\" d=\"M 219.839844 152 L 213.761719 152 L 213.761719 179.628906 L 233.617188 179.628906 L 233.617188 174.105469 L 219.839844 174.105469 Z M 219.839844 152 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#111111\" fill-opacity=\"1\" d=\"M 255.605469 145.484375 L 248.769531 145.394531 L 245.660156 149.433594 L 250.238281 149.433594 Z M 255.605469 145.484375 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#111111\" fill-opacity=\"1\" d=\"M 256.4375 165.894531 C 256.4375 170.628906 253.042969 174.5 248.148438 174.5 C 243.253906 174.5 239.777344 170.550781 239.777344 165.816406 L 239.777344 165.734375 C 239.777344 161 243.175781 157.128906 248.066406 157.128906 C 252.960938 157.128906 256.4375 161.078125 256.4375 165.816406 Z M 248.148438 151.523438 C 239.621094 151.523438 233.421875 157.960938 233.421875 165.816406 L 233.421875 165.894531 C 233.421875 173.75 239.542969 180.105469 248.066406 180.105469 C 256.59375 180.105469 262.792969 173.667969 262.792969 165.816406 L 262.792969 165.734375 C 262.792969 157.882812 256.675781 151.523438 248.148438 151.523438 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#111111\" fill-opacity=\"1\" d=\"M 37.121094 138.109375 L 37.121094 30.601562 L 286.996094 30.601562 Z M 34.132812 141.101562 L 291.96875 141.101562 L 291.96875 27.613281 L 34.132812 27.613281 Z M 34.132812 141.101562 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#ffffff\" stroke=\"#111111\" stroke-width=\"2.2\" paint-order=\"stroke\" fill-opacity=\"1\" d=\"M 63.824219 89 L 63.824219 88.804688 C 63.824219 69.015625 79.054688 53.492188 99.621094 53.492188 C 113.496094 53.492188 122.421875 59.3125 128.4375 67.65625 L 114.273438 78.621094 C 110.390625 73.769531 105.929688 70.664062 99.429688 70.664062 C 89.921875 70.664062 83.226562 78.714844 83.226562 88.613281 L 83.226562 88.804688 C 83.226562 98.992188 89.921875 106.949219 99.429688 106.949219 C 106.511719 106.949219 110.683594 103.648438 114.757812 98.703125 L 128.921875 108.792969 C 122.519531 117.621094 113.882812 124.121094 98.847656 124.121094 C 79.441406 124.121094 63.824219 109.277344 63.824219 89 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#ffffff\" stroke=\"#111111\" stroke-width=\"2.2\" paint-order=\"stroke\" fill-opacity=\"1\" d=\"M 132.707031 89 L 132.707031 88.804688 C 132.707031 69.015625 148.230469 53.492188 169.28125 53.492188 C 181.214844 53.492188 189.65625 57.179688 196.835938 63.386719 L 185.773438 76.679688 C 180.921875 72.605469 176.074219 70.277344 169.378906 70.277344 C 159.578125 70.277344 152.011719 78.523438 152.011719 88.902344 L 152.011719 89.097656 C 152.011719 100.058594 159.675781 107.917969 170.445312 107.917969 C 175.003906 107.917969 178.496094 106.949219 181.3125 105.105469 L 181.3125 96.859375 L 167.921875 96.859375 L 167.921875 83.082031 L 199.164062 83.082031 L 199.164062 113.640625 C 191.984375 119.558594 181.992188 124.121094 169.667969 124.121094 C 148.519531 124.121094 132.707031 109.566406 132.707031 89 \"></path>\n<path fill-rule=\"nonzero\" fill=\"#ffffff\" stroke=\"#111111\" stroke-width=\"2.2\" paint-order=\"stroke\" fill-opacity=\"1\" d=\"M 225.261719 71.34375 L 204.886719 71.34375 L 204.886719 54.851562 L 264.457031 54.851562 L 264.457031 71.34375 L 244.082031 71.34375 L 244.082031 122.761719 L 225.261719 122.761719 Z M 225.261719 71.34375 \"></path>\n</svg>"};
+const LOGO_AR=258.59/152.94;
+const $=id=>document.getElementById(id);
+
+// ---------- textos fixos per idioma ----------
+const L={
+  es:{assumpte:'Asunto',pag:(a,b)=>`Pág. ${a} de ${b}`,rebut:'Recibí',rebutH:'Nombre, fecha y firma o sello',ex:['Ejemplar para la empresa','Ejemplar para CGT'],at:'A la atención de',
+      mesos:['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'],
+      data:(d,m,y,M)=>`${d} de ${M[m]} de ${y}`},
+  va:{assumpte:'Assumpte',pag:(a,b)=>`Pàg. ${a} de ${b}`,rebut:'Rebut',rebutH:'Nom, data i signatura o segell',ex:["Exemplar per a l'empresa",'Exemplar per a CGT'],at:"A l'atenció de",
+      mesos:['gener','febrer','març','abril','maig','juny','juliol','agost','setembre','octubre','novembre','desembre'],
+      data:(d,m,y,M)=>`${d} ${/^[aeiou]/.test(M[m])?"d'":'de '}${M[m]} de ${y}`}
+};
+
+// ---------- models (models.js) ----------
+const MODELS=Object.assign({blanc:{n:'En blanc',es:{a:'',t:''},va:{a:'',t:''}}},window.CGT_MODELS||{});
+const SRC={castello:'Model de CGT Castelló (cgtcastello.org/delegades).',cig:'Model de la CIG (maig de 2026), traduït del gallec.'};
+(function(){const sel=$('model');(window.CGT_MODEL_GROUPS||[]).forEach(g=>{const og=document.createElement('optgroup');og.label=g.n;
+  Object.keys(MODELS).forEach(k=>{if(MODELS[k].g===g.id){const o=document.createElement('option');o.value=k;o.textContent=MODELS[k].n;og.appendChild(o);}});
+  if(og.children.length)sel.appendChild(og);});})();
+function modelText(){const m=MODELS[S.model]||MODELS.blanc;return m[S.lang]||m.es;}
+
+// ---------- estat ----------
+const KEY='cgt-escrits-v1';
+const S={lang:'es',model:'blanc',sig:null,lastModelText:''};
+const FIELDS=['aten','empresa','adreca','lloc','data','assumpte','cos','nom','carrec','rebut','copies','bn'];
+function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function val(id){const e=$(id);return e.type==='checkbox'?e.checked:e.value;}
+function save(){try{const o={lang:S.lang,model:S.model,sig:S.sig,last:S.lastModelText};FIELDS.forEach(k=>o[k]=val(k));localStorage.setItem(KEY,JSON.stringify(o));}catch(e){}}
+function load(){let o=null;try{o=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){}
+  if(o){FIELDS.forEach(k=>{if(k in o){const e=$(k);if(e.type==='checkbox')e.checked=!!o[k];else e.value=o[k];}});S.lang=o.lang||'es';S.model=o.model||'blanc';S.sig=o.sig||null;S.lastModelText=o.last||'';}
+  if(!$('data').value)$('data').value=today();
+  if(!MODELS[S.model])S.model='blanc';$('model').value=S.model;setLang(S.lang,true);showSig();hint();}
+
+function setLang(l,silent){S.lang=l;document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===l?'true':'false'));
+  if(!silent&&S.model!=='blanc'){ // canvia el model a l'altre idioma si el text no s'ha tocat
+    if(norm($('cos').value)===norm(S.lastModelText)||!$('cos').value.trim())applyModel(true);
+  }}
+function norm(s){return (s||'').replace(/\s+/g,' ').trim();}
+function fillModel(txt){
+  const emp=$('empresa').value.trim(),nom=$('nom').value.trim();
+  if(emp)txt=txt.split('[EMPRESA]').join(emp);
+  if(nom)txt=txt.split('[NOMBRE Y APELLIDOS]').join(nom).split('[NOM I COGNOMS]').join(nom);
+  return txt;}
+function applyModel(force){
+  const m=modelText();
+  const cur=$('cos').value;
+  if(!force&&cur.trim()&&norm(cur)!==norm(S.lastModelText)){$('replaceBanner').hidden=false;return;}
+  const t=fillModel(m.t);$('cos').value=t;S.lastModelText=t;
+  if(!$('assumpte').value.trim()||isModelSubject($('assumpte').value))$('assumpte').value=m.a;
+  $('replaceBanner').hidden=true;changed();}
+function isModelSubject(a){return Object.values(MODELS).some(m=>(m.es&&m.es.a===a)||(m.va&&m.va.a===a));}
+function hint(){const m=MODELS[S.model]||{};let h=SRC[m.src]||'';if(m.src&&S.lang==='va'&&!m.va)h+=' Aquest model només està en castellà.';$('modelHint').textContent=h;}
+
+// ---------- signatura ----------
+function showSig(){const i=$('sigImg');if(S.sig){i.src=S.sig;i.hidden=false;$('sigDel').hidden=false;}else{i.hidden=true;i.removeAttribute('src');$('sigDel').hidden=true;}}
+let sigImgEl=null;
+function sigImage(){return new Promise(r=>{if(!S.sig)return r(null);if(sigImgEl&&sigImgEl._src===S.sig)return r(sigImgEl);const im=new Image();im.onload=()=>{im._src=S.sig;sigImgEl=im;r(im)};im.onerror=()=>r(null);im.src=S.sig;});}
+function trimCanvas(c){const x=c.getContext('2d'),d=x.getImageData(0,0,c.width,c.height).data;let a=c.width,b=c.height,e=-1,f=-1;
+  for(let y=0;y<c.height;y++)for(let X=0;X<c.width;X++){if(d[(y*c.width+X)*4+3]>10){if(X<a)a=X;if(X>e)e=X;if(y<b)b=y;if(y>f)f=y;}}
+  if(e<0)return null;const p=6;a=Math.max(0,a-p);b=Math.max(0,b-p);e=Math.min(c.width-1,e+p);f=Math.min(c.height-1,f+p);
+  const o=document.createElement('canvas');o.width=e-a+1;o.height=f-b+1;o.getContext('2d').drawImage(c,a,b,o.width,o.height,0,0,o.width,o.height);return o.toDataURL('image/png');}
+// pad
+const pad=$('pad');let pctx,drawing=false,last=null,inked=false;
+function openPad(){$('padModal').hidden=false;const r=pad.getBoundingClientRect(),dpr=window.devicePixelRatio||1;pad.width=Math.round(r.width*dpr);pad.height=Math.round(r.height*dpr);pctx=pad.getContext('2d');pctx.scale(dpr,dpr);pctx.lineCap='round';pctx.lineJoin='round';pctx.strokeStyle='#111111';pctx.lineWidth=2.6;inked=false;}
+function pt(e){const r=pad.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top};}
+pad.addEventListener('pointerdown',e=>{e.preventDefault();pad.setPointerCapture(e.pointerId);drawing=true;last=pt(e);pctx.beginPath();pctx.arc(last.x,last.y,1.2,0,7);pctx.fillStyle='#111';pctx.fill();inked=true;});
+pad.addEventListener('pointermove',e=>{if(!drawing)return;e.preventDefault();const p=pt(e);pctx.beginPath();pctx.moveTo(last.x,last.y);pctx.lineTo(p.x,p.y);pctx.stroke();last=p;});
+['pointerup','pointercancel','pointerleave'].forEach(t=>pad.addEventListener(t,()=>{drawing=false;}));
+$('sigDraw').onclick=openPad;
+$('padClear').onclick=()=>{pctx.save();pctx.setTransform(1,0,0,1,0,0);pctx.clearRect(0,0,pad.width,pad.height);pctx.restore();inked=false;};
+$('padCancel').onclick=()=>{$('padModal').hidden=true;};
+$('padOk').onclick=()=>{if(inked){const d=trimCanvas(pad);if(d){S.sig=d;showSig();changed();}}$('padModal').hidden=true;};
+$('sigDel').onclick=()=>{S.sig=null;showSig();changed();};
+$('sigFile').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{
+  const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),k=Math.min(1,900/im.width);c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);const x=c.getContext('2d');x.drawImage(im,0,0,c.width,c.height);
+    // fons blanc → transparent
+    const id=x.getImageData(0,0,c.width,c.height),d=id.data;for(let i=0;i<d.length;i+=4){const l=(d[i]+d[i+1]+d[i+2])/3;if(l>225)d[i+3]=0;}x.putImageData(id,0,0);
+    S.sig=trimCanvas(c)||c.toDataURL('image/png');showSig();changed();};im.src=rd.result;};rd.readAsDataURL(f);e.target.value='';};
+
+// ---------- logos ----------
+const logoImgs={};
+function loadLogo(k){return new Promise(r=>{if(logoImgs[k])return r(logoImgs[k]);const im=new Image();im.onload=()=>{logoImgs[k]=im;r(im)};im.onerror=()=>r(null);im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(LOGO[k]);});}
+
+// ---------- maquetació ----------
+// Unitats en mm. A4 = 210 × 297.
+const PW=210,PH=297,HM=14,BL=20,BR=20,BW=PW-BL-BR,BOTTOM=PH-24;
+const C={roig:'#E42127',negre:'#111111',gris:'#5F5E59'};
+const fontsReady=(async()=>{try{await Promise.all(['400 20px "Open Sans"','700 20px "Open Sans"','800 20px "Open Sans"','400 20px "Anton"'].map(f=>document.fonts.load(f)));await document.fonts.ready;}catch(e){}})();
+
+function makeCtx(){const c=document.createElement('canvas');c.width=10;c.height=10;return c.getContext('2d');}
+const mctx=makeCtx();
+function font(x,w,mm,fam,k){x.font=`${w} ${mm*k}px "${fam}", ${fam==='Anton'?'Impact, sans-serif':'sans-serif'}`;}
+function tw(x,s,k){return x.measureText(s).width/k;}
+function spacedW(x,s,k,sp){return tw(x,s,k)+sp*(Math.max(0,[...s].length-1));}
+function drawSpaced(x,s,X,Y,k,sp,align){const ch=[...s];let w=spacedW(x,s,k,sp);let cx=align==='right'?X-w:align==='center'?X-w/2:X;x.textAlign='left';ch.forEach(c=>{x.fillText(c,cx*k,Y*k);cx+=tw(x,c,k)+sp;});}
+function wrap(x,text,maxW,k){const out=[];text.split('\n').forEach(par=>{const words=par.split(/ +/);let line='';
+  if(!par.trim()){out.push('');return;}
+  words.forEach(w=>{if(!w)return;const t=line?line+' '+w:w;if(tw(x,t,k)<=maxW||!line){
+      if(!line&&tw(x,w,k)>maxW){let s='';for(const ch of w){if(tw(x,s+ch,k)>maxW){out.push(s);s=ch;}else s+=ch;}line=s;}else line=t;}
+    else{out.push(line);line=w;}});
+  out.push(line);});return out;}
+
+function gather(){const o={};FIELDS.forEach(k=>o[k]=val(k));o.lang=S.lang;return o;}
+function dateText(o){const T=L[o.lang];const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(o.data||'');let s='';if(m)s=T.data(+m[3],+m[2]-1,m[1],T.mesos);return [o.lloc.trim(),s].filter(Boolean).join(', ');}
+
+// Construeix les pàgines com a llistes d'ordres de dibuix (independents de l'escala)
+function layout(o,k){
+  const T=L[o.lang],x=mctx,acc=o.bn?C.negre:C.roig;
+  const pages=[];let ops=[],y=0;
+  function newPage(first){if(ops.length||pages.length)pages.push(ops);ops=[];y=first?52:22;}
+  newPage(true);
+  const push=f=>ops.push(f);
+  function need(h){if(y+h>BOTTOM)newPage(false);}
+  // destinatària + data
+  const rec=[];if(o.aten.trim())rec.push({t:o.aten.trim(),b:false});if(o.empresa.trim())rec.push({t:o.empresa.trim(),b:true});
+  o.adreca.split('\n').map(s=>s.trim()).filter(Boolean).forEach(s=>rec.push({t:s,b:false}));
+  const dt=dateText(o);
+  font(x,400,3.5,'Open Sans',k);const dW=dt?tw(x,dt,k):0;
+  const recW=BW-dW-10;
+  let rl=[];rec.forEach(r=>{font(x,r.b?700:400,3.5,'Open Sans',k);wrap(x,r.t,Math.max(60,recW),k).forEach(l=>rl.push({t:l,b:r.b}));});
+  {const y0=y;push((c,k)=>{rl.forEach((r,i)=>{font(c,r.b?700:400,3.5,'Open Sans',k);c.fillStyle=C.negre;c.textAlign='left';c.fillText(r.t,BL*k,(y0+3.5+i*5.1)*k);});
+     if(dt){font(c,400,3.5,'Open Sans',k);c.textAlign='right';c.fillText(dt,(PW-BR)*k,(y0+3.5)*k);c.textAlign='left';}});
+   y+=Math.max(1,rl.length)*5.1+9;}
+  // assumpte
+  if(o.assumpte.trim()){
+    font(x,400,6.6,'Anton',k);const al=wrap(x,o.assumpte.trim().toUpperCase(),BW,k);
+    need(4+al.length*7.4+8);
+    const y0=y;push((c,k)=>{font(c,800,2.9,'Open Sans',k);c.fillStyle=C.negre;drawSpaced(c,T.assumpte.toUpperCase(),BL,y0+2.6,k,0.42,'left');
+      font(c,400,6.6,'Anton',k);al.forEach((l,i)=>c.fillText(l,BL*k,(y0+4.6+6.0+i*7.4)*k));
+      const by=y0+4.6+6.0+(al.length-1)*7.4+4;c.fillStyle=acc;c.fillRect(BL*k,by*k,24*k,2.1*k);});
+    y+=4.6+6.0+(al.length-1)*7.4+4+2.1+8;
+  }
+  // cos
+  const FS=3.75,LH=5.75,PG=2.9;
+  font(x,400,FS,'Open Sans',k);
+  const paras=o.cos.replace(/\r/g,'').split(/\n\s*\n/);
+  paras.forEach((p,pi)=>{
+    const lines=wrap(x,p.replace(/[ \t]+$/gm,''),BW,k);
+    // marca quines línies són final de línia «dura» (no justificar)
+    const hard=[];{let idx=0;p.split('\n').forEach(seg=>{const n=wrap(x,seg,BW,k).length;for(let j=0;j<n;j++)hard[idx+j]=(j===n-1);idx+=n;});}
+    const head=/^[A-ZÁÉÍÓÚÑÀÈÒÇ· ]{4,}:$/.test(p.trim());
+    if(head)need(LH*3);
+    lines.forEach((l,li)=>{need(LH);const y0=y,just=!hard[li]&&l.includes(' ');
+      push((c,k)=>{font(c,head?800:400,FS,'Open Sans',k);c.fillStyle=C.negre;c.textAlign='left';
+        if(just){const ws=l.split(' '),tot=ws.reduce((s,w)=>s+tw(c,w,k),0),gap=(BW-tot)/(ws.length-1);let cx=BL;ws.forEach(w=>{c.fillText(w,cx*k,(y0+FS*0.8)*k);cx+=tw(c,w,k)+gap;});}
+        else c.fillText(l,BL*k,(y0+FS*0.8)*k);});
+      y+=LH;});
+    if(pi<paras.length-1)y+=PG;
+  });
+  // signatura + rebut
+  const sigH=o._sig?20:12;
+  const nomL=o.nom.trim(),carL=o.carrec.trim();
+  font(x,400,3.4,'Open Sans',k);const carLines=carL?wrap(x,carL,BW/2-4,k):[];
+  const blockH=6+sigH+(nomL?5:0)+carLines.length*4.8;
+  const rebH=o.rebut?30:0;
+  need(Math.max(blockH,rebH+6));
+  {const y0=y+6;const sig=o._sig;
+   push((c,k)=>{let yy=y0;
+     if(sig){const h=18,w=Math.min(60,h*sig.width/sig.height);c.drawImage(sig,BL*k,yy*k,w*k,(w*sig.height/sig.width)*k);}
+     yy+=sigH;
+     if(nomL){font(c,700,3.6,'Open Sans',k);c.fillStyle=C.negre;c.textAlign='left';c.fillText(nomL,BL*k,(yy+3)*k);yy+=5;}
+     font(c,400,3.4,'Open Sans',k);c.fillStyle=C.negre;carLines.forEach((l,i)=>c.fillText(l,BL*k,(yy+3+i*4.8)*k));
+     if(o.rebut){const bw=68,bx=PW-BR-bw,by=y0;c.strokeStyle=C.negre;c.lineWidth=0.5*k;c.strokeRect(bx*k,by*k,bw*k,rebH*k);
+       font(c,800,2.9,'Open Sans',k);c.fillStyle=C.negre;drawSpaced(c,T.rebut.toUpperCase(),bx+3.5,by+5.5,k,0.42,'left');
+       font(c,400,2.7,'Open Sans',k);c.fillStyle=C.gris;c.fillText(T.rebutH,(bx+3.5)*k,(by+rebH-3.5)*k);}
+   });
+   y=y0+Math.max(blockH,rebH);}
+  pages.push(ops);
+  return pages;
+}
+
+function paintHeader(c,k,o,logo){
+  c.fillStyle='#fff';
+  // logo
+  const y0=12,lh=22,lw=lh*LOGO_AR;if(logo)c.drawImage(logo,HM*k,y0*k,lw*k,lh*k);
+  const R=PW-HM,bot=y0+lh;c.fillStyle=C.negre;c.textAlign='right';
+  font(c,400,7.1,'Anton',k);c.fillText('CONFEDERACIÓ GENERAL DEL TREBALL',R*k,(bot-14.6-4.1)*k);
+  font(c,800,2.9,'Open Sans',k);drawSpaced(c,'FEDERACIÓ INTERCOMARCAL DE CASTELLÓ',R,bot-13.2,k,0.41,'right');
+  font(c,400,2.9,'Open Sans',k);c.textAlign='right';
+  c.fillText('Av. Vall d’Uixó, 30, entresol B · 12004 Castelló de la Plana',R*k,(bot-8.6)*k);
+  c.fillText('Tel. 964 25 06 36 · 658 39 90 14',R*k,(bot-4.4)*k);
+  font(c,700,2.9,'Open Sans',k);
+  const web='cgtcastello.org',w1=tw(c,web,k);
+  c.fillStyle=o.bn?C.negre:C.roig;c.fillText(web,R*k,(bot-0.2)*k);
+  c.fillStyle=C.negre;c.fillText('castello@cgtpv.org · ',(R-w1)*k,(bot-0.2)*k);
+  c.textAlign='left';
+  c.fillRect(HM*k,(bot+4.8)*k,(PW-2*HM)*k,1.06*k);
+}
+function paintFooter(c,k,o,i,n,ex){
+  const T=L[o.lang],fy=PH-15;c.fillStyle=C.negre;c.fillRect(HM*k,fy*k,(PW-2*HM)*k,1.06*k);
+  font(c,400,4.2,'Anton',k);c.textAlign='left';c.fillText('CGTCASTELLO.ORG',HM*k,(fy+6.2)*k);
+  font(c,400,2.9,'Open Sans',k);c.textAlign='right';c.fillText(T.pag(i,n),(PW-HM)*k,(fy+5.6)*k);
+  if(ex){font(c,800,2.6,'Open Sans',k);drawSpaced(c,ex.toUpperCase(),PW/2,fy+5.5,k,0.36,'center');}
+  c.textAlign='left';
+}
+async function renderAll(k){
+  await fontsReady;const o=gather();
+  o._sig=await sigImage();const logo=await loadLogo(o.bn?'trama':'color');
+  const pages=layout(o,k);
+  const sets=o.copies?[L[o.lang].ex[0],L[o.lang].ex[1]]:[null];
+  const out=[];
+  sets.forEach(ex=>pages.forEach((ops,i)=>{
+    const cv=document.createElement('canvas');cv.width=Math.round(PW*k);cv.height=Math.round(PH*k);
+    const c=cv.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,cv.width,cv.height);c.textBaseline='alphabetic';
+    if(i===0)paintHeader(c,k,o,logo);
+    ops.forEach(f=>f(c,k));
+    paintFooter(c,k,o,i+1,pages.length,ex);
+    out.push(cv);}));
+  return out;
+}
+
+// ---------- previsualització ----------
+let tmr=null,busy=false,again=false;
+async function preview(){if(busy){again=true;return;}busy=true;
+  try{const box=$('pages');const w=Math.max(280,box.clientWidth||600);const k=w*(window.devicePixelRatio||1)/PW;
+    const cvs=await renderAll(k);box.replaceChildren(...cvs);cvs.forEach((c,i)=>c.setAttribute('aria-label','Pàgina '+(i+1)));}
+  catch(e){console.error(e);}
+  busy=false;if(again){again=false;preview();}}
+function warnings(){const o=gather(),w=[];
+  const ph=[...new Set(((o.cos+' '+o.assumpte).match(/\[[^\]\n]{1,240}\]/g)||[]))];
+  if(ph.length)w.push('<b>Falta omplir:</b> '+ph.map(esc).join(', '));
+  if(!o.empresa.trim())w.push("<b>Falta l'empresa</b> destinatària.");
+  if(!o.nom.trim())w.push('<b>Falta qui signa.</b>');
+  const el=$('warn');el.innerHTML=w.join('<br>');el.hidden=!w.length;}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function changed(){save();warnings();clearTimeout(tmr);tmr=setTimeout(preview,250);}
+
+// ---------- exportació ----------
+function slug(s){return (s||'escrit').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,50)||'escrit';}
+async function buildPdf(){
+  const {jsPDF}=window.jspdf||{};if(!jsPDF)throw new Error('nojspdf');
+  const cvs=await renderAll(8.27); // ≈ 210 ppp
+  const doc=new jsPDF({unit:'mm',format:'a4',compress:true});
+  cvs.forEach((cv,i)=>{if(i)doc.addPage('a4');doc.addImage(cv.toDataURL('image/jpeg',0.85),'JPEG',0,0,PW,PH,undefined,'FAST');});
+  const o=gather();doc.setProperties({title:o.assumpte||'Escrit CGT Castelló',author:'CGT Castelló'});
+  const name='cgt-'+slug(o.assumpte)+'-'+(o.data||today())+'.pdf';
+  return {blob:doc.output('blob'),name};
+}
+function status(t){$('status').textContent=t;}
+let dl=null;
+(async()=>{try{if(window.claude&&window.claude.use)dl=await window.claude.use('downloads');}catch(e){dl=null;}})();
+const inClaude=()=>!!(window.claude&&window.claude.use);
+$('pdfBtn').onclick=async()=>{const b=$('pdfBtn');b.disabled=true;status('Generant el PDF…');
+  try{const {blob,name}=await buildPdf();
+    if(dl){try{await dl.save({filename:name,data:blob});status('PDF preparat: '+name);}catch(e){status("No s'ha baixat el PDF.");}}
+    else if(!inClaude()){const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);status('PDF baixat: '+name);}
+    else status('Aquesta vista no permet baixar arxius. Obri la pàgina a pantalla completa i torna-ho a provar.');
+  }catch(e){console.error(e);status("No s'ha pogut generar el PDF. Torna-ho a provar.");}
+  b.disabled=false;};
+// Compartir (fora de Claude, p. ex. a GitHub Pages): obri WhatsApp, correu…
+(function(){try{if(!inClaude()&&navigator.canShare&&navigator.canShare({files:[new File(['x'],'x.pdf',{type:'application/pdf'})]}))$('shareBtn').hidden=false;}catch(e){}})();
+$('shareBtn').onclick=async()=>{try{const {blob,name}=await buildPdf();const f=new File([blob],name,{type:'application/pdf'});await navigator.share({files:[f],title:gather().assumpte||'Escrit'});}catch(e){if(e&&e.name!=='AbortError')status("No s'ha pogut compartir.");}};
+$('copyTxt').onclick=async()=>{const o=gather();const t=[dateText(o),'',[o.aten,o.empresa,o.adreca].filter(s=>s.trim()).join('\n'),'',o.assumpte?L[o.lang].assumpte+': '+o.assumpte:'','',o.cos,'',o.nom,o.carrec].join('\n').replace(/\n{3,}/g,'\n\n').trim();
+  try{await navigator.clipboard.writeText(t);status('Text copiat.');}catch(e){status("No s'ha pogut copiar.");}};
+
+// ---------- esdeveniments ----------
+document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{setLang(b.dataset.lang);hint();changed();});
+$('model').onchange=e=>{S.model=e.target.value;hint();if(S.model==='blanc'){changed();return;}applyModel(false);};
+$('repYes').onclick=()=>applyModel(true);
+$('repNo').onclick=()=>{$('replaceBanner').hidden=true;};
+$('clearAll').onclick=()=>{$('clearBanner').hidden=false;};
+$('clrNo').onclick=()=>{$('clearBanner').hidden=true;};
+$('clrYes').onclick=()=>{FIELDS.forEach(k=>{const e=$(k);if(e.type==='checkbox')e.checked=(k==='rebut');else e.value='';});$('lloc').value='Castelló de la Plana';$('data').value=today();S.sig=null;S.model='blanc';S.lastModelText='';$('model').value='blanc';hint();showSig();$('clearBanner').hidden=true;changed();};
+FIELDS.forEach(k=>{$(k).addEventListener('input',changed);$(k).addEventListener('change',changed);});
+let rw=0;window.addEventListener('resize',()=>{const w=$('pages').clientWidth;if(Math.abs(w-rw)>20){rw=w;clearTimeout(tmr);tmr=setTimeout(preview,200);}});
+load();warnings();preview();
+})();
+</script>
+</body>
+</html>
