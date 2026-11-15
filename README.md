@@ -13,6 +13,7 @@ Web per a fer, des del mòbil o l'ordinador, escrits amb la capçalera de CGT Ca
 - PDF amb text de veritat (es pot copiar i buscar) i les fonts incrustades. Si les fonts no es poden carregar, el PDF es fa com a imatge.
 - «Recorda les dades de la secció»: l'atenció, l'empresa, l'adreça, el lloc, el nom, el càrrec i la signatura es mantenen en restablir.
 - Es pot instal·lar al mòbil com una aplicació i funciona sense connexió una vegada oberta (`sw.js`).
+- Al mòbil, com a molt una vegada per setmana, ix un avís per a afegir-la a la pantalla d'inici: a Android, amb botó per a instal·lar-la; a iPhone i iPad, amb les instruccions. No ix si ja està instal·lada ni dins de Claude.
 
 ## D'on ixen els models
 

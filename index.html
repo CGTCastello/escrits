@@ -70,6 +70,13 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid v
 .sig img{height:56px;max-width:180px;border:2px dashed #BDBDBD;padding:4px;background:#fff}
 .banner{background:var(--groc);padding:12px 14px;font-size:14px;font-weight:700;display:flex;flex-direction:column;gap:10px}
 .banner[hidden]{display:none}
+.inst{max-width:1280px;margin:12px auto 0;padding:0 20px}
+@media (max-width:860px){.inst{padding:0 12px}}
+.inst .banner{flex-direction:row;align-items:flex-start;gap:12px}
+.inst .banner img{width:48px;height:48px;flex:none;border:2px solid var(--negre);background:#fff}
+.inst .banner>div{display:flex;flex-direction:column;gap:10px;flex:1}
+.inst .banner .t{font-family:Anton,sans-serif;font-weight:400;text-transform:uppercase;font-size:18px;line-height:1}
+.inst .banner p{margin:0;font-weight:400;line-height:1.45}
 .warn{background:#fff;border-left:0;border-top:4px solid var(--roig);padding:12px 14px;font-size:13px;line-height:1.45}
 .warn[hidden]{display:none}
 .warn b{font-weight:800}
@@ -102,6 +109,17 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid v
   </div>
   <img id="hdrLogo" alt="CGT Castelló">
 </header>
+
+<div class="inst" id="instBox" hidden>
+  <div class="banner" role="region" aria-label="Instal·la l'aplicació">
+    <img src="icons/apple-touch-icon.png" alt="">
+    <div>
+      <div class="t">Tin-la a la pantalla d'inici</div>
+      <p id="instTxt">Afig «Escrits CGT» a la pantalla d'inici del mòbil: s'obrirà com una aplicació i funcionarà també sense connexió.</p>
+      <div class="btns"><button type="button" class="btn small dark" id="instYes">Afig-la</button><button type="button" class="btn small" id="instNo">Ara no</button></div>
+    </div>
+  </div>
+</div>
 
 <div class="wrap">
 <form id="f" autocomplete="off">
@@ -567,6 +585,29 @@ $('warn').addEventListener('click',e=>{const b=e.target.closest('.ph');if(b)goPh
 FIELDS.forEach(k=>{$(k).addEventListener('input',changed);$(k).addEventListener('change',changed);});
 let rw=0;window.addEventListener('resize',()=>{const w=$('pages').clientWidth;if(Math.abs(w-rw)>20){rw=w;clearTimeout(tmr);tmr=setTimeout(preview,200);}});
 load();warnings();preview();
+// ---------- avís per a afegir-la a la pantalla d'inici (com a molt, una vegada per setmana) ----------
+(function(){
+  const KEYI='cgt-escrits-instal',SETMANA=7*24*3600*1000;
+  const get=()=>{try{return localStorage.getItem(KEYI);}catch(e){return null;}},put=v=>{try{localStorage.setItem(KEYI,v);}catch(e){}};
+  const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+  if(inClaude()||standalone()||!/^https?:$/.test(location.protocol))return;
+  const v=get();if(v==='instal·lada'||(v&&Date.now()-(+v)<SETMANA))return;
+  const ios=!/Android/i.test(navigator.userAgent)&&(/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1));
+  const mobil=matchMedia('(pointer:coarse)').matches;
+  let ev=null;
+  function show(){if(!$('instBox').hidden)return;put(String(Date.now()));$('instBox').hidden=false;}
+  function hide(){$('instBox').hidden=true;}
+  $('instNo').onclick=hide;
+  $('instYes').onclick=async()=>{
+    if(ev){ev.prompt();try{const r=await ev.userChoice;if(r&&r.outcome==='accepted')put('instal·lada');}catch(e){}ev=null;hide();}
+    else hide();};
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();ev=e;if(mobil)show();});
+  window.addEventListener('appinstalled',()=>{put('instal·lada');hide();});
+  // iPhone i iPad no tenen botó d'instal·lar: s'explica com fer-ho a mà
+  if(ios)setTimeout(()=>{if(ev)return;$('instTxt').textContent="Toca el botó Compartir (el quadrat amb la fletxa cap amunt; si no el veus, obri el menú «···») i tria «Afegeix a la pantalla d'inici» («Añadir a pantalla de inicio»). S'obrirà com una aplicació i funcionarà també sense connexió.";
+    $('instYes').textContent="D'acord";$('instNo').hidden=true;show();},2500);
+})();
+
 // sense connexió (només a la web publicada; dins de Claude no)
 if('serviceWorker' in navigator&&!inClaude()&&/^https?:$/.test(location.protocol))window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 })();
