@@ -56,7 +56,7 @@ Ja està publicat a https://cgtcastello.github.io/escrits/ (repositori `CGTCaste
 
 1. A **Settings → Pages**, *Source*: **GitHub Actions**. El flux `.github/workflows/pages.yml` publica la web en cada push a `main`.
 2. En un parell de minuts estarà a `https://<usuari-o-organització>.github.io/<repositori>/`.
-3. Com que la web funciona sense connexió, qui ja l'havia oberta veu els canvis la segona vegada que l'obri. Si canvies la llista de fitxers, puja `VERSIO` en `sw.js`.
+3. Sense connexió: la pàgina, `models.js` i el manifest es carreguen primer de la xarxa (sempre l'última versió) i, sense cobertura, del que hi ha guardat; les fonts, les icones i jsPDF ixen del que hi ha guardat. Si canvies la llista de fitxers, puja `VERSIO` en `sw.js`.
 4. Opcional: subdomini propi amb un arxiu `CNAME` i un registre DNS CNAME.
 
 No cal compilar res. Per a provar-ho en local: `python3 -m http.server 8000` (cal un servidor: obrint l'arxiu directament no es carreguen els models ni el service worker).

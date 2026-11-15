@@ -1,7 +1,11 @@
 // Service worker d’«Escrits»: perquè la web funcione sense connexió.
-// Estratègia: respon amb el que hi ha guardat i, alhora, ho actualitza per a la pròxima vegada.
+// Estratègia:
+//  · la pàgina, models.js i el manifest van primer a la xarxa (així sempre es veu l'última versió)
+//    i només si no hi ha connexió (o tarda més de 4 s) es tira del que hi ha guardat;
+//  · fonts, icones i jsPDF, que quasi no canvien, ixen del que hi ha guardat i s'actualitzen de fons.
 // Si canvies la llista de fitxers, puja el número de VERSIO.
-const VERSIO = 'escrits-v1';
+const VERSIO = 'escrits-v2';
+const ESTATICS = /\/(fonts|icons|vendor)\//;
 const FITXERS = [
   './',
   'index.html',
@@ -39,14 +43,26 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
+  const clau = req.mode === 'navigate' ? './' : req;
   e.respondWith(caches.open(VERSIO).then(async cache => {
-    const clau = req.mode === 'navigate' ? './' : req;
-    const guardat = await cache.match(clau, { ignoreSearch: true });
-    const xarxa = fetch(req).then(r => {
-      if (r && r.ok) cache.put(clau, r.clone());
-      return r;
-    }).catch(() => null);
-    if (guardat) { e.waitUntil(xarxa); return guardat; }
-    return (await xarxa) || new Response('Sense connexió', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+    const guarda = r => { if (r && r.ok) cache.put(clau, r.clone()); return r; };
+    const guardat = () => cache.match(clau, { ignoreSearch: true });
+    const sense = () => new Response('Sense connexió', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+
+    if (ESTATICS.test(new URL(req.url).pathname)) {
+      const g = await guardat();
+      const xarxa = fetch(req).then(guarda).catch(() => null);
+      if (g) { e.waitUntil(xarxa); return g; }
+      return (await xarxa) || sense();
+    }
+    // primer la xarxa; si falla o tarda, el que hi ha guardat
+    const xarxa = fetch(req, { cache: 'no-cache' }).then(guarda);
+    e.waitUntil(xarxa.catch(() => null));
+    const temps = new Promise(r => setTimeout(r, 4000));
+    try {
+      const r = await Promise.race([xarxa, temps.then(() => { throw new Error('lent'); })]);
+      if (r) return r;
+    } catch (_) {}
+    return (await guardat()) || (await xarxa.catch(() => null)) || sense();
   }));
 });
