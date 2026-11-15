@@ -62,6 +62,8 @@ index.html   L'editor (HTML + CSS + JS)
 models.js    Els models d'escrit
 fonts/       Anton i Open Sans (SIL OFL 1.1)
 vendor/      jsPDF 2.5.1 (MIT)
+og-image.png Miniatura per a quan es comparteix l'enllaç (1200×630)
+.github/     Flux que publica a GitHub Pages en cada push a main
 .nojekyll    Perquè GitHub Pages servisca els arxius tal qual
 CLAUDE.md    Context per a treballar el codi amb Claude Code
 ```
