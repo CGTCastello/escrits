@@ -52,6 +52,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid v
 .btn.small{font-size:15px;min-height:44px;padding:9px 12px}
 .btn:disabled{opacity:.5;cursor:wait}
 .btns{display:flex;flex-wrap:wrap;gap:8px}
+.reset{display:flex;justify-content:flex-end}
 .sig{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .sig img{height:56px;max-width:180px;border:2px dashed #BDBDBD;padding:4px;background:#fff}
 .banner{background:var(--groc);padding:12px 14px;font-size:14px;font-weight:700;display:flex;flex-direction:column;gap:10px}
@@ -90,6 +91,13 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid v
 
 <div class="wrap">
 <form id="f" autocomplete="off">
+  <div class="reset">
+    <button type="button" class="btn small" id="clearAll">Restableix-ho tot</button>
+  </div>
+  <div class="banner" id="clearBanner" hidden>
+    <div>Es buidaran tots els camps, la signatura i les opcions, i tornarà al model «En blanc» en castellà.</div>
+    <div class="btns"><button type="button" class="btn small dark" id="clrYes">Restableix</button><button type="button" class="btn small" id="clrNo">Cancel·la</button></div>
+  </div>
   <fieldset>
     <legend>Escrit</legend>
     <label>Idioma de l'escrit
@@ -148,11 +156,6 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid v
     <label class="chk"><input type="checkbox" id="bn"><span>Blanc i negre <span class="h">Per a imprimir o fotocopiar sense color</span></span></label>
     <div class="btns">
       <button type="button" class="btn small" id="copyTxt">Copia el text</button>
-      <button type="button" class="btn small" id="clearAll">Buida-ho tot</button>
-    </div>
-    <div class="banner" id="clearBanner" hidden>
-      <div>S'esborraran tots els camps i la signatura.</div>
-      <div class="btns"><button type="button" class="btn small dark" id="clrYes">Esborra</button><button type="button" class="btn small" id="clrNo">Cancel·la</button></div>
     </div>
   </fieldset>
 </form>
@@ -449,7 +452,13 @@ $('repYes').onclick=()=>applyModel(true);
 $('repNo').onclick=()=>{$('replaceBanner').hidden=true;};
 $('clearAll').onclick=()=>{$('clearBanner').hidden=false;};
 $('clrNo').onclick=()=>{$('clearBanner').hidden=true;};
-$('clrYes').onclick=()=>{FIELDS.forEach(k=>{const e=$(k);if(e.type==='checkbox')e.checked=(k==='rebut');else e.value='';});$('lloc').value='Castelló de la Plana';$('data').value=today();S.sig=null;S.model='blanc';S.lastModelText='';$('model').value='blanc';hint();showSig();$('clearBanner').hidden=true;changed();};
+$('clrYes').onclick=()=>{
+  FIELDS.forEach(k=>{const e=$(k);if(e.type==='checkbox')e.checked=(k==='rebut');else e.value='';});
+  $('lloc').value='Castelló de la Plana';$('data').value=today();$('sigFile').value='';
+  S.sig=null;S.model='blanc';S.lastModelText='';$('model').value='blanc';setLang('es',true);
+  $('replaceBanner').hidden=true;$('clearBanner').hidden=true;
+  try{localStorage.removeItem(KEY);}catch(e){}
+  hint();showSig();changed();window.scrollTo(0,0);};
 FIELDS.forEach(k=>{$(k).addEventListener('input',changed);$(k).addEventListener('change',changed);});
 let rw=0;window.addEventListener('resize',()=>{const w=$('pages').clientWidth;if(Math.abs(w-rw)>20){rw=w;clearTimeout(tmr);tmr=setTimeout(preview,200);}});
 load();warnings();preview();
