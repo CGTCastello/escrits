@@ -1,4 +1,4 @@
-// Service worker de «Escrits amb capçalera»: perquè la web funcione sense connexió.
+// Service worker d’«Escrits»: perquè la web funcione sense connexió.
 // Estratègia: respon amb el que hi ha guardat i, alhora, ho actualitza per a la pròxima vegada.
 // Si canvies la llista de fitxers, puja el número de VERSIO.
 const VERSIO = 'escrits-v1';

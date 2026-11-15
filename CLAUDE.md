@@ -1,4 +1,4 @@
-# CLAUDE.md — Escrits amb capçalera de CGT Castelló
+# CLAUDE.md — Escrits de CGT Castelló
 
 Web estàtica (GitHub Pages), sense servidor ni compilació. Interfície en valencià; públic: delegades i afiliades, sobretot des del mòbil.
 

@@ -1,4 +1,4 @@
-/* Models d'escrit de l'editor «Escrits amb capçalera» de CGT Castelló.
+/* Models d'escrit de l'editor «Escrits» de CGT Castelló.
  *
  * NOMÉS dues fonts (no s'hi afig cap model redactat de nou):
  *   · «castello»: models propis de CGT Castelló, https://cgtcastello.org/delegades

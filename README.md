@@ -1,4 +1,4 @@
-# Escrits amb capçalera · CGT Castelló
+# Escrits · CGT Castelló
 
 Web per a fer, des del mòbil o l'ordinador, escrits amb la capçalera de CGT Castelló i baixar-los en PDF per a enviar-los a l'empresa. Tot passa al navegador: ni el text ni la signatura s'envien a cap servidor.
 
