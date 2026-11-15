@@ -8,8 +8,11 @@ Web per a fer, des del mòbil o l'ordinador, escrits amb la capçalera de CGT Ca
 - Camps: destinatària, lloc i data, assumpte, text, nom i càrrec de qui signa.
 - Signatura amb el dit o amb una imatge.
 - Requadre de «Rebut» per a la còpia segellada i opció de dos exemplars en un mateix PDF.
-- Avís dels buits `[ENTRE CLAUDÀTORS]` que queden per omplir.
-- 31 models d'escrit, en castellà i en valencià (`models.js`).
+- Avís dels buits `[ENTRE CLAUDÀTORS]` que queden per omplir: en tocar-ne un, porta al punt del text i el deixa seleccionat.
+- 31 models d'escrit, en castellà i en valencià (`models.js`), amb un cercador que també entén paraules en castellà.
+- PDF amb text de veritat (es pot copiar i buscar) i les fonts incrustades. Si les fonts no es poden carregar, el PDF es fa com a imatge.
+- «Recorda les dades de la secció»: l'atenció, l'empresa, l'adreça, el lloc, el nom, el càrrec i la signatura es mantenen en restablir.
+- Es pot instal·lar al mòbil com una aplicació i funciona sense connexió una vegada oberta (`sw.js`).
 
 ## D'on ixen els models
 
@@ -48,20 +51,25 @@ Tampoc s'han inclòs les actes, convocatòries i calendaris d'eleccions, que no 
 
 ## Publicar-ho a GitHub Pages
 
-1. Puja aquesta carpeta a un repositori de GitHub.
-2. A **Settings → Pages**: *Deploy from a branch*, branca `main`, carpeta `/ (root)`.
-3. En un parell de minuts estarà a `https://<usuari-o-organització>.github.io/<repositori>/`.
+Ja està publicat a https://cgtcastello.github.io/escrits/ (repositori `CGTCastello/escrits`).
+
+1. A **Settings → Pages**, *Source*: **GitHub Actions**. El flux `.github/workflows/pages.yml` publica la web en cada push a `main`.
+2. En un parell de minuts estarà a `https://<usuari-o-organització>.github.io/<repositori>/`.
+3. Com que la web funciona sense connexió, qui ja l'havia oberta veu els canvis la segona vegada que l'obri. Si canvies la llista de fitxers, puja `VERSIO` en `sw.js`.
 4. Opcional: subdomini propi amb un arxiu `CNAME` i un registre DNS CNAME.
 
-No cal compilar res. Per a provar-ho en local: `python3 -m http.server 8000`.
+No cal compilar res. Per a provar-ho en local: `python3 -m http.server 8000` (cal un servidor: obrint l'arxiu directament no es carreguen els models ni el service worker).
 
 ## Estructura
 
 ```
 index.html   L'editor (HTML + CSS + JS)
 models.js    Els models d'escrit
-fonts/       Anton i Open Sans (SIL OFL 1.1)
+fonts/       Anton i Open Sans (SIL OFL 1.1); fonts/pdf/ són les mateixes en TTF, per a incrustar-les al PDF
 vendor/      jsPDF 2.5.1 (MIT)
+icons/       Favicon i icones per a instal·lar-la al mòbil (fetes a partir del logo)
+manifest.webmanifest  Dades per a instal·lar-la com a aplicació
+sw.js        Service worker: funcionament sense connexió
 og-image.png Miniatura per a quan es comparteix l'enllaç (1200×630)
 .github/     Flux que publica a GitHub Pages en cada push a main
 .nojekyll    Perquè GitHub Pages servisca els arxius tal qual

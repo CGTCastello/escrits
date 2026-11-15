@@ -16,6 +16,12 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Escrits amb capçalera de CGT Castelló">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-title" content="Escrits CGT">
 <link rel="stylesheet" href="fonts/fonts.css">
 <script src="vendor/jspdf.umd.min.js"></script>
 <script src="models.js"></script>
@@ -34,7 +40,7 @@ fieldset{border:0;margin:0;padding:16px;background:#fff;display:flex;flex-direct
 legend{float:left;width:100%;padding:0;margin:0 0 2px;font-family:Anton,sans-serif;text-transform:uppercase;font-size:20px;line-height:1}
 label{display:flex;flex-direction:column;gap:5px;font-weight:700;font-size:13px}
 label .h{font-weight:400;color:var(--gris);font-size:12px}
-input[type=text],input[type=date],select,textarea{font:inherit;font-size:16px;font-weight:400;border:2px solid var(--negre);background:#fff;padding:10px 11px;width:100%;color:var(--negre);-webkit-appearance:none;appearance:none}
+input[type=text],input[type=search],input[type=date],select,textarea{font:inherit;font-size:16px;font-weight:400;border:2px solid var(--negre);background:#fff;padding:10px 11px;width:100%;color:var(--negre);-webkit-appearance:none;appearance:none}
 select{background-image:linear-gradient(45deg,transparent 50%,#111 50%),linear-gradient(135deg,#111 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 12px) 50%;background-size:6px 6px;background-repeat:no-repeat;padding-right:34px}
 textarea{resize:vertical;line-height:1.5}
 #cos{min-height:340px}
@@ -53,6 +59,13 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid v
 .btn:disabled{opacity:.5;cursor:wait}
 .btns{display:flex;flex-wrap:wrap;gap:8px}
 .reset{display:flex;justify-content:flex-end}
+.res{display:flex;flex-direction:column;border:2px solid var(--negre);border-top:0;margin-top:-12px}
+.res[hidden]{display:none}
+.res button{font:inherit;font-size:15px;font-weight:700;text-align:left;background:#fff;border:0;border-top:1px solid var(--linia);padding:10px 11px;min-height:44px;cursor:pointer;color:var(--negre);display:flex;flex-direction:column;gap:2px}
+.res button:first-child{border-top:0}
+.res button:hover,.res button:focus-visible{background:var(--groc)}
+.res button small{font-weight:400;font-size:12px;color:var(--gris)}
+.res .no{padding:10px 11px;font-size:13px;color:var(--gris)}
 .sig{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .sig img{height:56px;max-width:180px;border:2px dashed #BDBDBD;padding:4px;background:#fff}
 .banner{background:var(--groc);padding:12px 14px;font-size:14px;font-weight:700;display:flex;flex-direction:column;gap:10px}
@@ -60,6 +73,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid v
 .warn{background:#fff;border-left:0;border-top:4px solid var(--roig);padding:12px 14px;font-size:13px;line-height:1.45}
 .warn[hidden]{display:none}
 .warn b{font-weight:800}
+.warn .ph{font:inherit;font-weight:700;background:var(--groc);color:var(--negre);border:0;padding:3px 7px;margin:3px 4px 0 0;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 .prev{position:sticky;top:12px;display:flex;flex-direction:column;gap:12px}
 @media (max-width:860px){.prev{position:static}}
 .prev .lab{font-weight:800;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gris)}
@@ -95,8 +109,8 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid v
     <button type="button" class="btn small" id="clearAll">Restableix-ho tot</button>
   </div>
   <div class="banner" id="clearBanner" hidden>
-    <div>Es buidaran tots els camps, la signatura i les opcions, i tornarà al model «En blanc» en castellà.</div>
-    <div class="btns"><button type="button" class="btn small dark" id="clrYes">Restableix</button><button type="button" class="btn small" id="clrNo">Cancel·la</button></div>
+    <div id="clrTxt">Es buidaran tots els camps, la signatura i les opcions, i tornarà al model «En blanc» en castellà.</div>
+    <div class="btns"><button type="button" class="btn small dark" id="clrYes">Restableix</button><button type="button" class="btn small" id="clrAll2" hidden>Esborra també les dades</button><button type="button" class="btn small" id="clrNo">Cancel·la</button></div>
   </div>
   <fieldset>
     <legend>Escrit</legend>
@@ -106,6 +120,8 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid v
         <button type="button" data-lang="va" aria-pressed="false">Valencià</button>
       </div>
     </label>
+    <label>Busca un model <span class="h">Per exemple: lactància, excedencia, vacances, expedient</span><input type="search" id="cerca" placeholder="Escriu una paraula" autocomplete="off" enterkeyhint="search"></label>
+    <div class="res" id="cercaRes" hidden></div>
     <label for="model">Model
       <select id="model">
         <option value="blanc">En blanc</option>
@@ -151,6 +167,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid v
 
   <fieldset>
     <legend>Opcions</legend>
+    <label class="chk"><input type="checkbox" id="recorda"><span>Recorda les dades de la secció <span class="h">L'atenció, l'empresa, l'adreça, el lloc, el nom, el càrrec i la signatura es queden encara que restablisques. Només en aquest dispositiu.</span></span></label>
     <label class="chk"><input type="checkbox" id="rebut" checked><span>Requadre de «Rebut» <span class="h">Perquè l'empresa signe o segelle la vostra còpia en mà</span></span></label>
     <label class="chk"><input type="checkbox" id="copies"><span>Dues còpies <span class="h">«Exemplar per a l'empresa» i «Exemplar per a CGT» en el mateix PDF</span></span></label>
     <label class="chk"><input type="checkbox" id="bn"><span>Blanc i negre <span class="h">Per a imprimir o fotocopiar sense color</span></span></label>
@@ -171,7 +188,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid v
   <div class="pages" id="pages"></div>
 </section>
 </div>
-<div class="foot">Tot es fa al teu dispositiu: el text i la signatura no s'envien a cap servidor. L'esborrany es guarda només en aquest navegador. Els models són els de CGT Castelló (cgtcastello.org/delegades) i els de permisos familiars de la CIG (maig de 2026), traduïts del gallec. Revisa'ls i adapta'ls al teu cas i al teu conveni abans d'enviar-los.</div>
+<div class="foot">Tot es fa al teu dispositiu: el text i la signatura no s'envien a cap servidor. L'esborrany i, si ho demanes, les dades de la secció es guarden només en aquest navegador. La web funciona també sense connexió una vegada oberta. Els models són els de CGT Castelló (cgtcastello.org/delegades) i els de permisos familiars de la CIG (maig de 2026), traduïts del gallec. Revisa'ls i adapta'ls al teu cas i al teu conveni abans d'enviar-los.</div>
 
 <div class="modal" id="padModal" hidden role="dialog" aria-modal="true" aria-labelledby="padT">
   <div class="box">
@@ -209,6 +226,19 @@ const SRC={castello:'Model de CGT Castelló (cgtcastello.org/delegades).',cig:'M
 (function(){const sel=$('model');(window.CGT_MODEL_GROUPS||[]).forEach(g=>{const og=document.createElement('optgroup');og.label=g.n;
   Object.keys(MODELS).forEach(k=>{if(MODELS[k].g===g.id){const o=document.createElement('option');o.value=k;o.textContent=MODELS[k].n;og.appendChild(o);}});
   if(og.children.length)sel.appendChild(og);});})();
+const fold=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const GNAME={};(window.CGT_MODEL_GROUPS||[]).forEach(g=>GNAME[g.id]=g.n);
+const HAY={};Object.keys(MODELS).forEach(k=>{if(k==='blanc')return;const m=MODELS[k];HAY[k]=fold([m.n,GNAME[m.g],m.es&&m.es.a,m.va&&m.va.a].join(' '));});
+// primer els models que ho tenen en el nom, després en l'assumpte i, al final, només en el nom del grup
+function search(q){const ws=fold(q).split(/\s+/).filter(Boolean);if(!ws.length)return null;
+  const rank=k=>{const m=MODELS[k],n=fold(m.n),a=fold([m.es&&m.es.a,m.va&&m.va.a].join(' '));return ws.every(w=>n.includes(w))?0:ws.every(w=>n.includes(w)||a.includes(w))?1:2;};
+  return Object.keys(HAY).filter(k=>ws.every(w=>HAY[k].includes(w))).map((k,i)=>[rank(k),i,k]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]).map(x=>x[2]);}
+function showResults(){const box=$('cercaRes'),r=search($('cerca').value);if(!r){box.hidden=true;box.replaceChildren();return;}
+  const items=r.slice(0,8).map(k=>{const b=document.createElement('button');b.type='button';b.dataset.k=k;const t=document.createElement('span');t.textContent=MODELS[k].n;const g=document.createElement('small');g.textContent=GNAME[MODELS[k].g]||'';b.append(t,g);return b;});
+  if(!r.length){const d=document.createElement('div');d.className='no';d.textContent='Cap model coincideix. Prova amb una altra paraula o mira el desplegable.';items.push(d);}
+  else if(r.length>8){const d=document.createElement('div');d.className='no';d.textContent='I '+(r.length-8)+' més. Afina la cerca.';items.push(d);}
+  box.replaceChildren(...items);box.hidden=false;}
+function pickModel(k){$('cerca').value='';showResults();$('model').value=k;S.model=k;hint();applyModel(false);$('model').focus();}
 function modelText(){const m=MODELS[S.model]||MODELS.blanc;return m[S.lang]||m.es;}
 
 // ---------- estat ----------
@@ -217,10 +247,17 @@ const S={lang:'es',model:'blanc',sig:null,lastModelText:''};
 const FIELDS=['aten','empresa','adreca','lloc','data','assumpte','cos','nom','carrec','rebut','copies','bn'];
 function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function val(id){const e=$(id);return e.type==='checkbox'?e.checked:e.value;}
-function save(){try{const o={lang:S.lang,model:S.model,sig:S.sig,last:S.lastModelText};FIELDS.forEach(k=>o[k]=val(k));localStorage.setItem(KEY,JSON.stringify(o));}catch(e){}}
+function save(){try{const o={lang:S.lang,model:S.model,sig:S.sig,last:S.lastModelText};FIELDS.forEach(k=>o[k]=val(k));localStorage.setItem(KEY,JSON.stringify(o));}catch(e){}savePerfil();}
+// dades de la secció que es mantenen en restablir (opció «Recorda les dades de la secció»)
+const KEYP='cgt-escrits-perfil';
+const PERFIL=['aten','empresa','adreca','lloc','nom','carrec'];
+function getPerfil(){try{return JSON.parse(localStorage.getItem(KEYP)||'null');}catch(e){return null;}}
+function savePerfil(){if(!$('recorda').checked)return;try{const p={sig:S.sig};PERFIL.forEach(k=>p[k]=val(k));localStorage.setItem(KEYP,JSON.stringify(p));}catch(e){}}
+function dropPerfil(){try{localStorage.removeItem(KEYP);}catch(e){}}
 function load(){let o=null;try{o=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){}
   if(o){FIELDS.forEach(k=>{if(k in o){const e=$(k);if(e.type==='checkbox')e.checked=!!o[k];else e.value=o[k];}});S.lang=o.lang||'es';S.model=o.model||'blanc';S.sig=o.sig||null;S.lastModelText=o.last||'';}
   if(!$('data').value)$('data').value=today();
+  $('recorda').checked=!!getPerfil();
   if(!MODELS[S.model])S.model='blanc';$('model').value=S.model;setLang(S.lang,true);showSig();hint();}
 
 function setLang(l,silent){S.lang=l;document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===l?'true':'false'));
@@ -284,7 +321,7 @@ const mctx=makeCtx();
 function font(x,w,mm,fam,k){x.font=`${w} ${mm*k}px "${fam}", ${fam==='Anton'?'Impact, sans-serif':'sans-serif'}`;}
 function tw(x,s,k){return x.measureText(s).width/k;}
 function spacedW(x,s,k,sp){return tw(x,s,k)+sp*(Math.max(0,[...s].length-1));}
-function drawSpaced(x,s,X,Y,k,sp,align){const ch=[...s];let w=spacedW(x,s,k,sp);let cx=align==='right'?X-w:align==='center'?X-w/2:X;x.textAlign='left';ch.forEach(c=>{x.fillText(c,cx*k,Y*k);cx+=tw(x,c,k)+sp;});}
+function drawSpaced(x,s,X,Y,k,sp,align){const ch=[...s];let w=spacedW(x,s,k,sp);let cx=align==='right'?X-w:align==='center'?X-w/2:X;x.textAlign='left';if(x.spaced){x.spaced(s,cx,Y,sp);return;}ch.forEach(c=>{x.fillText(c,cx*k,Y*k);cx+=tw(x,c,k)+sp;});}
 function wrap(x,text,maxW,k){const out=[];text.split('\n').forEach(par=>{const words=par.split(/ +/);let line='';
   if(!par.trim()){out.push('');return;}
   words.forEach(w=>{if(!w)return;const t=line?line+' '+w:w;if(tw(x,t,k)<=maxW||!line){
@@ -296,8 +333,8 @@ function gather(){const o={};FIELDS.forEach(k=>o[k]=val(k));o.lang=S.lang;return
 function dateText(o){const T=L[o.lang];const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(o.data||'');let s='';if(m)s=T.data(+m[3],+m[2]-1,m[1],T.mesos);return [o.lloc.trim(),s].filter(Boolean).join(', ');}
 
 // Construeix les pàgines com a llistes d'ordres de dibuix (independents de l'escala)
-function layout(o,k){
-  const T=L[o.lang],x=mctx,acc=o.bn?C.negre:C.roig;
+function layout(o,k,mx){
+  const T=L[o.lang],x=mx||mctx,acc=o.bn?C.negre:C.roig;
   const pages=[];let ops=[],y=0;
   function newPage(first){if(ops.length||pages.length)pages.push(ops);ops=[];y=first?52:22;}
   newPage(true);
@@ -388,7 +425,9 @@ function paintFooter(c,k,o,i,n,ex){
 async function renderAll(k){
   await fontsReady;const o=gather();
   o._sig=await sigImage();const logo=await loadLogo(o.bn?'trama':'color');
-  const pages=layout(o,k);
+  // talla les línies amb les mateixes mètriques que el PDF, perquè la vista prèvia hi coincidisca
+  const mx=await pdfMeasurer().catch(()=>null);
+  const pages=layout(o,k,mx);
   const sets=o.copies?[L[o.lang].ex[0],L[o.lang].ex[1]]:[null];
   const out=[];
   sets.forEach(ex=>pages.forEach((ops,i)=>{
@@ -401,6 +440,48 @@ async function renderAll(k){
   return out;
 }
 
+// ---------- PDF amb text de veritat (jsPDF + fonts TTF incrustades) ----------
+// Les ordres de dibuix de layout() s'escriuen contra l'API de canvas; pdfCtx() en fa la mateixa API sobre jsPDF (en mm).
+const PDF_FONTS=[['Anton-Regular.ttf','Anton','normal'],['OpenSans-Regular.ttf','Open Sans','normal'],['OpenSans-Bold.ttf','Open Sans','bold'],['OpenSans-ExtraBold.ttf','Open Sans','extrabold']];
+let pdfFontData=null,measurer=null;
+function toB64(buf){const u=new Uint8Array(buf);let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s);}
+function loadPdfFonts(){if(!pdfFontData)pdfFontData=Promise.all(PDF_FONTS.map(([f])=>fetch('fonts/pdf/'+f).then(r=>{if(!r.ok)throw new Error(f);return r.arrayBuffer();}).then(toB64)))
+    .catch(e=>{pdfFontData=null;throw e;});return pdfFontData;}
+async function newDoc(){const {jsPDF}=window.jspdf||{};if(!jsPDF)throw new Error('nojspdf');const data=await loadPdfFonts();
+  const doc=new jsPDF({unit:'mm',format:'a4',compress:true});
+  PDF_FONTS.forEach(([f,fam,st],i)=>{doc.addFileToVFS(f,data[i]);doc.addFont(f,fam,st);});return doc;}
+function pdfMeasurer(){if(!measurer)measurer=newDoc().then(pdfCtx).catch(e=>{measurer=null;throw e;});return measurer;}
+let imgN=0;
+function imgPng(img){if(img._png)return img._png;const sc=/^data:image\/svg/.test(img.src)?4:1;const c=document.createElement('canvas');
+  c.width=Math.round((img.naturalWidth||img.width)*sc);c.height=Math.round((img.naturalHeight||img.height)*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+  img._png=c.toDataURL('image/png');img._alias='img'+(++imgN);return img._png;}
+function pdfCtx(doc){
+  const rgb=h=>{h=h.replace('#','');if(h.length===3)h=h.replace(/./g,'$&$&');return [0,2,4].map(i=>parseInt(h.substr(i,2),16));};
+  let align='left';
+  return {
+    set font(f){const m=/^(\d+)\s+([\d.e-]+)px\s+"([^"]+)"/.exec(f);const w=+m[1],fam=m[3];
+      doc.setFont(fam,fam==='Anton'?'normal':w>=800?'extrabold':w>=700?'bold':'normal');doc.setFontSize(+m[2]*72/25.4);},
+    set fillStyle(c){const [r,g,b]=rgb(c);doc.setTextColor(r,g,b);doc.setFillColor(r,g,b);},
+    set strokeStyle(c){const [r,g,b]=rgb(c);doc.setDrawColor(r,g,b);},
+    set lineWidth(w){doc.setLineWidth(w);},
+    set textAlign(a){align=a;},get textAlign(){return align;},
+    set textBaseline(_){},
+    measureText(s){return {width:doc.getTextWidth(s)};},
+    fillText(s,x,y){doc.text(s,x,y,{align:align==='right'||align==='center'?align:'left'});},
+    spaced(s,x,y,sp){doc.text(s,x,y,{charSpace:sp});},
+    fillRect(x,y,w,h){doc.rect(x,y,w,h,'F');},
+    strokeRect(x,y,w,h){doc.rect(x,y,w,h,'S');},
+    drawImage(img,x,y,w,h){const d=imgPng(img);doc.addImage(d,'PNG',x,y,w,h,img._alias,'FAST');}
+  };}
+async function buildTextPdf(){
+  const doc=await newDoc(),c=pdfCtx(doc);
+  await fontsReady;const o=gather();o._sig=await sigImage();const logo=await loadLogo(o.bn?'trama':'color');
+  const pages=layout(o,1,c);
+  const sets=o.copies?[L[o.lang].ex[0],L[o.lang].ex[1]]:[null];let n=0;
+  sets.forEach(ex=>pages.forEach((ops,i)=>{if(n++)doc.addPage('a4');
+    if(i===0)paintHeader(c,1,o,logo);ops.forEach(f=>f(c,1));paintFooter(c,1,o,i+1,pages.length,ex);}));
+  return doc;}
+
 // ---------- previsualització ----------
 let tmr=null,busy=false,again=false;
 async function preview(){if(busy){again=true;return;}busy=true;
@@ -410,20 +491,32 @@ async function preview(){if(busy){again=true;return;}busy=true;
   busy=false;if(again){again=false;preview();}}
 function warnings(){const o=gather(),w=[];
   const ph=[...new Set(((o.cos+' '+o.assumpte).match(/\[[^\]\n]{1,240}\]/g)||[]))];
-  if(ph.length)w.push('<b>Falta omplir:</b> '+ph.map(esc).join(', '));
+  if(ph.length)w.push('<b>Falta omplir</b> (toca\'n un per a anar-hi): '+ph.map(p=>'<button type="button" class="ph" data-ph="'+esc(p)+'">'+esc(p)+'</button>').join(''));
   if(!o.empresa.trim())w.push("<b>Falta l'empresa</b> destinatària.");
   if(!o.nom.trim())w.push('<b>Falta qui signa.</b>');
   const el=$('warn');el.innerHTML=w.join('<br>');el.hidden=!w.length;}
+// porta al buit: el selecciona perquè en escriure se substituïsca
+function goPh(p){for(const id of ['assumpte','cos']){const el=$(id),i=el.value.indexOf(p);if(i<0)continue;
+    el.scrollIntoView({block:'center',behavior:'smooth'});el.focus({preventScroll:true});el.setSelectionRange(i,i+p.length);
+    if(el.tagName==='TEXTAREA')scrollTa(el,i);return;}}
+function scrollTa(ta,i){const cs=getComputedStyle(ta),m=document.createElement('div');
+  ['fontFamily','fontSize','fontWeight','lineHeight','letterSpacing','paddingTop','paddingLeft','paddingRight'].forEach(q=>m.style[q]=cs[q]);
+  Object.assign(m.style,{position:'absolute',visibility:'hidden',left:'-9999px',top:'0',whiteSpace:'pre-wrap',overflowWrap:'break-word',boxSizing:'border-box',border:'0',width:ta.clientWidth+'px'});
+  m.textContent=ta.value.slice(0,i);document.body.appendChild(m);const h=m.scrollHeight;m.remove();ta.scrollTop=Math.max(0,h-ta.clientHeight/3);}
 function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function changed(){save();warnings();clearTimeout(tmr);tmr=setTimeout(preview,250);}
 
 // ---------- exportació ----------
 function slug(s){return (s||'escrit').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,50)||'escrit';}
-async function buildPdf(){
+// Pla B: si no es poden carregar les fonts del PDF, cada pàgina va com a imatge (≈ 210 ppp)
+async function buildImagePdf(){
   const {jsPDF}=window.jspdf||{};if(!jsPDF)throw new Error('nojspdf');
-  const cvs=await renderAll(8.27); // ≈ 210 ppp
+  const cvs=await renderAll(8.27);
   const doc=new jsPDF({unit:'mm',format:'a4',compress:true});
   cvs.forEach((cv,i)=>{if(i)doc.addPage('a4');doc.addImage(cv.toDataURL('image/jpeg',0.85),'JPEG',0,0,PW,PH,undefined,'FAST');});
+  return doc;}
+async function buildPdf(){
+  let doc;try{doc=await buildTextPdf();}catch(e){console.warn('PDF amb text no disponible; es fa com a imatge.',e);doc=await buildImagePdf();}
   const o=gather();doc.setProperties({title:o.assumpte||'Escrit CGT Castelló',author:'CGT Castelló'});
   const name='cgt-'+slug(o.assumpte)+'-'+(o.data||today())+'.pdf';
   return {blob:doc.output('blob'),name};
@@ -450,18 +543,32 @@ document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{setLang(b.dat
 $('model').onchange=e=>{S.model=e.target.value;hint();if(S.model==='blanc'){changed();return;}applyModel(false);};
 $('repYes').onclick=()=>applyModel(true);
 $('repNo').onclick=()=>{$('replaceBanner').hidden=true;};
-$('clearAll').onclick=()=>{$('clearBanner').hidden=false;};
+$('clearAll').onclick=()=>{const p=$('recorda').checked;
+  $('clrTxt').textContent=p?"Es buidarà l'escrit i les opcions, i tornarà al model «En blanc» en castellà. Les dades de la secció es mantenen.":'Es buidaran tots els camps, la signatura i les opcions, i tornarà al model «En blanc» en castellà.';
+  $('clrAll2').hidden=!p;$('clearBanner').hidden=false;};
 $('clrNo').onclick=()=>{$('clearBanner').hidden=true;};
-$('clrYes').onclick=()=>{
+function resetAll(keepPerfil){const p=keepPerfil&&$('recorda').checked?getPerfil():null;
+  if(!keepPerfil){dropPerfil();$('recorda').checked=false;}
   FIELDS.forEach(k=>{const e=$(k);if(e.type==='checkbox')e.checked=(k==='rebut');else e.value='';});
-  $('lloc').value='Castelló de la Plana';$('data').value=today();$('sigFile').value='';
+  $('lloc').value='Castelló de la Plana';$('data').value=today();$('sigFile').value='';$('cerca').value='';showResults();
   S.sig=null;S.model='blanc';S.lastModelText='';$('model').value='blanc';setLang('es',true);
+  if(p){PERFIL.forEach(k=>{if(k in p)$(k).value=p[k];});S.sig=p.sig||null;}
   $('replaceBanner').hidden=true;$('clearBanner').hidden=true;
   try{localStorage.removeItem(KEY);}catch(e){}
-  hint();showSig();changed();window.scrollTo(0,0);};
+  hint();showSig();changed();window.scrollTo(0,0);}
+$('clrYes').onclick=()=>resetAll(true);
+$('clrAll2').onclick=()=>resetAll(false);
+$('recorda').onchange=()=>{if($('recorda').checked)savePerfil();else dropPerfil();};
+$('cerca').addEventListener('input',showResults);
+$('cerca').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const b=$('cercaRes').querySelector('button');if(b)pickModel(b.dataset.k);}
+  else if(e.key==='Escape'){$('cerca').value='';showResults();}});
+$('cercaRes').addEventListener('click',e=>{const b=e.target.closest('button');if(b)pickModel(b.dataset.k);});
+$('warn').addEventListener('click',e=>{const b=e.target.closest('.ph');if(b)goPh(b.dataset.ph);});
 FIELDS.forEach(k=>{$(k).addEventListener('input',changed);$(k).addEventListener('change',changed);});
 let rw=0;window.addEventListener('resize',()=>{const w=$('pages').clientWidth;if(Math.abs(w-rw)>20){rw=w;clearTimeout(tmr);tmr=setTimeout(preview,200);}});
 load();warnings();preview();
+// sense connexió (només a la web publicada; dins de Claude no)
+if('serviceWorker' in navigator&&!inClaude()&&/^https?:$/.test(location.protocol))window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 })();
 </script>
 </body>
